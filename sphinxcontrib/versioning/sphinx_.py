@@ -6,7 +6,15 @@ import multiprocessing
 import os
 import sys
 
-from sphinx import application, build_main, locale
+# from sphinx import application, build_main, locale
+from sphinx import application, locale
+
+try:
+    from sphinx import build_main
+except ImportError:
+    # Python 3.6+ ImportError fix
+    from sphinx.cmd.build import build_main
+
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.config import Config as SphinxConfig
 from sphinx.errors import SphinxError
@@ -57,7 +65,11 @@ class EventHandlers(object):
 
         # Add versions.html to sidebar.
         if '**' not in app.config.html_sidebars:
-            app.config.html_sidebars['**'] = StandaloneHTMLBuilder.default_sidebars + ['versions.html']
+            # app.config.html_sidebars['**'] = StandaloneHTMLBuilder.default_sidebars + ['versions.html']
+            try:
+                app.config.html_sidebars['**'] = StandaloneHTMLBuilder.default_sidebars + ['versions.html']
+            except AttributeError:
+                app.config.html_sidebars['**'] = ['versions.html']
         elif 'versions.html' not in app.config.html_sidebars['**']:
             app.config.html_sidebars['**'].append('versions.html')
 
@@ -131,7 +143,7 @@ class EventHandlers(object):
             if os.path.isfile(file_path):
                 lufmt = app.config.html_last_updated_fmt or getattr(locale, '_')('%b %d, %Y')
                 mtime = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
-                context['last_updated'] = format_date(lufmt, mtime, language=app.config.language, warn=app.warn)
+                context['last_updated'] = format_date(lufmt, mtime, language=app.config.language)
 
 
 def setup(app):
@@ -163,9 +175,9 @@ def setup(app):
 class ConfigInject(SphinxConfig):
     """Inject this extension info self.extensions. Append after user's extensions."""
 
-    def __init__(self, dirname, filename, overrides, tags):
+    def __init__(self, *args):
         """Constructor."""
-        super(ConfigInject, self).__init__(dirname, filename, overrides, tags)
+        super(ConfigInject, self).__init__(*args)
         self.extensions.append('sphinxcontrib.versioning.sphinx_')
 
 
@@ -199,7 +211,7 @@ def _build(argv, config, versions, current_name, is_root):
         argv += config.overflow
 
     # Build.
-    result = build_main(argv)
+    result = build_main(argv[1:])
     if result != 0:
         raise SphinxError
 
