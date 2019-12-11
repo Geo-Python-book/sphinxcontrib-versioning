@@ -10,6 +10,7 @@ import tarfile
 import time
 from datetime import datetime
 from subprocess import CalledProcessError, PIPE, Popen, STDOUT
+from io import BytesIO
 
 IS_WINDOWS = sys.platform == 'win32'
 RE_ALL_REMOTES = re.compile(r'([\w./-]+)\t([A-Za-z0-9@:/\\._-]+) \((fetch|push)\)\n')
@@ -270,7 +271,7 @@ def fetch_commits(local_root, remotes):
             run_command(local_root, ['git', 'reflog', sha])
 
 
-def export(local_root, commit, target):
+def export(local_root, commit, name, target, include_submodules):
     """Export git commit to directory. "Extracts" all files at the commit to the target directory.
 
     Set mtime of RST files to last commit date.
@@ -288,7 +289,6 @@ def export(local_root, commit, target):
     # Define extract function.
     def extract(stdout):
         """Extract tar archive from "git archive" stdout.
-
         :param file stdout: Handle to git's stdout pipe.
         """
         queued_links = list()
@@ -313,8 +313,32 @@ def export(local_root, commit, target):
         except tarfile.TarError as exc:
             log.debug('Failed to extract output from "git archive" command: %s', str(exc))
 
-    # Run command.
-    run_command(local_root, ['git', 'archive', '--format=tar', commit], pipeto=extract)
+    if include_submodules:
+        log.debug('including submodules...')
+        command = ['git', 'checkout', name]
+        run_command(local_root, command)
+
+        command = ['git', 'pull', '--recurse-submodules']
+        run_command(local_root, command)
+
+        command = ['git', 'submodule', 'update', '--init', '--remote', '--recursive']
+        run_command(local_root, command)
+
+        command = ['git', 'ls-files', '--recurse-submodules']
+        files = run_command(local_root, command).split('\n')
+        files = [i for i in files if i] 
+
+        output_file = BytesIO()
+        with tarfile.open(fileobj=output_file, mode='w|') as tar: 
+            for file in files:
+                if file:
+                    tar.add(os.path.join(local_root, file), arcname=file)
+
+        input_file = BytesIO(output_file.getvalue())
+        extract(input_file)
+
+    else:
+        run_command(local_root, ['git', 'archive', '--format=tar', 'HEAD', '.'], pipeto=extract)
 
     # Set mtime.
     for file_path in mtimes:

@@ -98,7 +98,7 @@ class Versions(object):
     :ivar dict recent_tag_remote: Most recently committed tag.
     """
 
-    def __init__(self, remotes, sort=None, priority=None, invert=False):
+    def __init__(self, remotes, sort=None, priority=None, invert=False, include_submodules=False):
         """Constructor.
 
         :param iter remotes: Output of routines.gather_git_info(). Converted to list of dicts as instance variable.
@@ -122,6 +122,7 @@ class Versions(object):
         self.recent_branch_remote = None
         self.recent_remote = None
         self.recent_tag_remote = None
+        self.include_submodules = include_submodules
 
         # Sort one or more times.
         if sort:

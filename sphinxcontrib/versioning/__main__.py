@@ -195,6 +195,7 @@ def build_options(func):
                         help='The branch/tag at the root of DESTINATION. Will also be in subdir. Default master.')(func)
     func = click.option('-s', '--sort', multiple=True, type=click.Choice(('semver', 'alpha', 'time')),
                         help='Sort versions. Specify multiple times to sort equal values of one kind.')(func)
+    func = click.option('-S', '--include_submodules', help='Include git submodules.', is_flag=True)(func)
     func = click.option('-t', '--greatest-tag', is_flag=True,
                         help='Override root-ref to be the tag with the highest version number.')(func)
     func = click.option('-T', '--recent-tag', is_flag=True,
@@ -275,11 +276,13 @@ def build(config, rel_source, destination, **options):
     if not remotes:
         log.error('No docs found in any remote branch/tag. Nothing to do.')
         raise HandledError
+
     versions = Versions(
         remotes,
         sort=config.sort,
         priority=config.priority,
         invert=config.invert,
+        include_submodules=config.include_submodules,
     )
 
     # Get root ref.
