@@ -280,7 +280,9 @@ def export(local_root, commit, name, target, include_submodules):
 
     :param str local_root: Local path to git root directory.
     :param str commit: Git commit SHA to export.
+    :param str name: Git branch name
     :param str target: Directory to export to.
+    :param bool include_submodules: Include Git submodules
     """
     log = logging.getLogger(__name__)
     target = os.path.realpath(target)

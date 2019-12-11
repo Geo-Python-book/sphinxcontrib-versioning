@@ -105,6 +105,7 @@ class Versions(object):
         :param iter sort: List of strings (order matters) to sort remotes by. Strings may be: alpha, time, semver
         :param str priority: May be "branches" or "tags". Groups either before the other. Maintains order otherwise.
         :param bool invert: Invert sorted/grouped remotes at the end of processing.
+        :param bool include_submodules: Include git submodules
         """
         self.remotes = [dict(
             id='/'.join(r[2:0:-1]),  # str; kind/name
