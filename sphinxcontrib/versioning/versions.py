@@ -98,13 +98,14 @@ class Versions(object):
     :ivar dict recent_tag_remote: Most recently committed tag.
     """
 
-    def __init__(self, remotes, sort=None, priority=None, invert=False):
+    def __init__(self, remotes, sort=None, priority=None, invert=False, include_submodules=False):
         """Constructor.
 
         :param iter remotes: Output of routines.gather_git_info(). Converted to list of dicts as instance variable.
         :param iter sort: List of strings (order matters) to sort remotes by. Strings may be: alpha, time, semver
         :param str priority: May be "branches" or "tags". Groups either before the other. Maintains order otherwise.
         :param bool invert: Invert sorted/grouped remotes at the end of processing.
+        :param bool include_submodules: Include git submodules
         """
         self.remotes = [dict(
             id='/'.join(r[2:0:-1]),  # str; kind/name
@@ -122,6 +123,7 @@ class Versions(object):
         self.recent_branch_remote = None
         self.recent_remote = None
         self.recent_tag_remote = None
+        self.include_submodules = include_submodules
 
         # Sort one or more times.
         if sort:

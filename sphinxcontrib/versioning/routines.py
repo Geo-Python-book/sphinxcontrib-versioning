@@ -114,12 +114,15 @@ def pre_build(local_root, versions):
     """
     log = logging.getLogger(__name__)
     exported_root = TempDir(True).name
-
     # Extract all.
-    for sha in {r['sha'] for r in versions.remotes}:
+    for remote in versions.remotes:
+        sha = remote['sha']
+        name = remote['name']
+        log.debug('current branch name: {}'.format(name))
+
         target = os.path.join(exported_root, sha)
         log.debug('Exporting %s to temporary directory.', sha)
-        export(local_root, sha, target)
+        export(local_root, sha, name, target, versions.include_submodules)
 
     # Build root.
     remote = versions[Config.from_context().root_ref]
