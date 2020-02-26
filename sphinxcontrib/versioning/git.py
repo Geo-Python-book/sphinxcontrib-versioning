@@ -344,6 +344,11 @@ def export(local_root, commit, name, target, include_submodules):
 
     # Set mtime.
     for file_path in mtimes:
+        # DEBUG
+        print(run_command(local_root, ['pwd']))
+        print(run_command(local_root, ['git', 'status']))
+        print(run_command(local_root, ['git', 'log']))
+        # DEBUG
         last_committed = int(run_command(local_root, ['git', 'log', '-n1', '--format=%at', commit, '--', file_path]))
         os.utime(os.path.join(target, file_path), (last_committed, last_committed))
 
