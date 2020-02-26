@@ -347,7 +347,7 @@ def export(local_root, commit, name, target, include_submodules):
         # DEBUG
         print(run_command(local_root, ['pwd']))
         print(run_command(local_root, ['git', 'status']))
-        print(run_command(local_root, ['git', 'log']))
+        #print(run_command(local_root, ['git', 'log']))
         print(commit)
         print(file_path)
         print(run_command(local_root, ['git', 'log', '-n1', '--format=%at', commit, '--', file_path]))
