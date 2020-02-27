@@ -340,7 +340,9 @@ def export(local_root, commit, name, target, include_submodules):
         extract(input_file)
 
     else:
-        run_command(local_root, ['git', 'archive', '--format=tar', 'HEAD', '.'], pipeto=extract)
+        #run_command(local_root, ['git', 'archive', '--format=tar', 'HEAD', '.'], pipeto=extract)
+        # Reverting to original version of this line of code
+        run_command(local_root, ['git', 'archive', '--format=tar', commit], pipeto=extract)
 
     # Set mtime.
     for file_path in mtimes:
@@ -351,7 +353,7 @@ def export(local_root, commit, name, target, include_submodules):
         #print(run_command(local_root, ['git', 'log']))
         print('commit:', commit)
         print('file_path:', file_path)
-        print('last_committed', run_command(local_root, ['git', 'log', '-n1', '--format=%at', commit, '--', file_path]))
+        print('last_committed:', run_command(local_root, ['git', 'log', '-n1', '--format=%at', commit, '--', file_path]))
         # DEBUG
         last_committed = int(run_command(local_root, ['git', 'log', '-n1', '--format=%at', commit, '--', file_path]))
         os.utime(os.path.join(target, file_path), (last_committed, last_committed))
